@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
-import times from "lodash/times";
-import assign from "lodash/assign";
 import Bluebird from "bluebird";
 import { getAddress } from "@harmony-js/crypto";
 import ArtCollectibleToken from "../contracts/ArtCollectibleToken.json";
+
+const { REACT_APP_COLLECTIBLE_CONTRACT } = process.env;
 
 export const Web3Info = (props) => {
   const { web3Context } = props;
@@ -13,27 +13,26 @@ export const Web3Info = (props) => {
   const [balance, setBalance] = useState(0);
   const [tokenBalance, setTokenBalance] = useState(0);
   const [collectibleTokenIds, setCollectibleTokenIds] = useState([]);
+  const [collectibleTokens, setCollectibleTokens] = useState<any[]>([]);
 
-  // Get the address's balance
-  const getOneBalance = useCallback(async () => {
-    const balance =
-      accounts && accounts.length > 0
-        ? lib.utils.fromWei(await lib.eth.getBalance(accounts[0]), "ether")
-        : "Unknown";
-    setBalance(balance);
-  }, [accounts, lib.eth, lib.utils]);
-
-  // gets total balance of One tokens
+  // gets total balance of One tokens as account address
   useEffect(() => {
-    getOneBalance();
-  }, [accounts, getOneBalance, networkId]);
+    async function getOneBalance() {
+      const balance =
+        accounts && accounts.length > 0
+          ? lib.utils.fromWei(await lib.eth.getBalance(accounts[0]), "ether")
+          : "Unknown";
+      setBalance(balance);
+    }
+    getOneBalance().then(() => Promise.resolve());
+  }, [accounts, lib]);
 
   // Get our collectible contract based on the approved connection
   const contract = useMemo(() => {
     if (lib?.eth?.Contract) {
       return new lib.eth.Contract(
         ArtCollectibleToken.abi,
-        "0x704C4e00efaC241e6047bb5Bc525751a7d51B88f"
+        REACT_APP_COLLECTIBLE_CONTRACT
       );
     }
     return null;
@@ -47,28 +46,25 @@ export const Web3Info = (props) => {
         .call();
       setTokenBalance(collectionBalance);
     }
-    if (contract && accounts && accounts.length) {
-      getTokenBalance();
+    if (contract && accounts && accounts?.length) {
+      getTokenBalance().then(() => Promise.resolve());
     }
   }, [contract, accounts]);
 
-  // get the token ids by index of the address
+  // get the token ids by index of owned NFT of the address
   useEffect(() => {
     async function getCollectibleTokenIds() {
-      const tokens: any = [];
-      // for (let i = 0; i < tokenBalance; i++) {
-      await times(tokenBalance, async (i) => {
-        const token = await contract.methods
-          .tokenOfOwnerByIndex(accounts[0], i)
-          .call();
-        tokens.push(token);
-      });
+      // create an empty array with length just
+      // to take advantage of bluebird
+      const tokens = await Bluebird.mapSeries(new Array(tokenBalance), (v, i) =>
+        contract.methods.tokenOfOwnerByIndex(accounts[0], i).call()
+      );
       setCollectibleTokenIds(tokens);
     }
-    if (tokenBalance) {
-      getCollectibleTokenIds();
+    if (tokenBalance && accounts?.length) {
+      getCollectibleTokenIds().then(() => Promise.resolve());
     }
-  }, [tokenBalance]);
+  }, [tokenBalance, accounts]);
 
   // gets the NFT metadata of the owner's tokens
   useEffect(() => {
@@ -85,17 +81,16 @@ export const Web3Info = (props) => {
       const tokensAndMetadata = await Bluebird.map(
         tokensIdAndURI,
         async (tokenIdAndURI) => {
-          console.log(tokenIdAndURI);
           const metadata = await axios
             .get(tokenIdAndURI.tokenURI)
             .then(({ data }) => data);
-          return assign({}, tokenIdAndURI, { metadata });
+          return { ...tokenIdAndURI, metadata: { ...metadata } };
         }
       );
-      console.log(tokensAndMetadata);
+      setCollectibleTokens(tokensAndMetadata);
     }
     if (collectibleTokenIds.length) {
-      getCollectibleTokenMetadata();
+      getCollectibleTokenMetadata().then(() => Promise.resolve());
     }
   }, [collectibleTokenIds]);
 
@@ -103,7 +98,7 @@ export const Web3Info = (props) => {
     try {
       await web3Context.requestAuth();
     } catch (e) {
-      console.error(e);
+      // console.error(e);
     }
   };
 
@@ -127,11 +122,26 @@ export const Web3Info = (props) => {
         <div>Accounts & Signing Status: Access Granted</div>
       ) : !!networkId && providerName !== "infura" ? (
         <div>
-          <button onClick={requestAccess}>Request Access</button>
+          <button type="submit" onClick={requestAccess}>
+            Request Access
+          </button>
         </div>
       ) : (
-        <div></div>
+        <div />
       )}
+      <div>Total of {tokenBalance} NFTs</div>
+      <div>
+        {collectibleTokens.length &&
+          collectibleTokens.map((token) => {
+            return (
+              <img
+                key={token.metadata.title}
+                src={token.metadata.image}
+                alt={token.metadata.title}
+              />
+            );
+          })}
+      </div>
     </div>
   );
 };

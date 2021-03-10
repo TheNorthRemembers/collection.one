@@ -1,21 +1,24 @@
 import React from "react";
+import { Box, Heading } from "rimble-ui";
 import { useWeb3 } from "@openzeppelin/network/react";
-import { Web3Info } from "./components/Web3Info";
+import HarmonyAccountProvider from "./contexts/HarmonyAccount";
+import Demo from "./components/Demo";
 import "./App.css";
 
-function App() {
+function App(): JSX.Element {
   const web3Context = useWeb3(`wss://ws.s0.b.hmny.io`);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <div className="App">
-          <div>
-            <h1>OpenZeppelin Network.js</h1>
-            <Web3Info title="Web3 Info" web3Context={web3Context} />
-          </div>
-        </div>
-      </header>
-    </div>
+    <Box className="App">
+      <Heading as="h1" className="App-header">
+        NFT Proof of Concept for Harmony Blockchain - Built on Testnet
+      </Heading>
+      <Box className="App-content">
+        <HarmonyAccountProvider key="1" web3Context={web3Context}>
+          <Demo />
+        </HarmonyAccountProvider>
+      </Box>
+    </Box>
   );
 }
 
