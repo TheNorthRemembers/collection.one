@@ -10,8 +10,8 @@ import { Contract } from "web3-eth-contract";
 
 import axios from "axios";
 import Bluebird from "bluebird";
-import ArtCollectibleToken from "../contracts/ArtCollectibleToken.json";
 import { getAddress } from "@harmony-js/crypto";
+import ArtCollectibleToken from "../contracts/ArtCollectibleToken.json";
 
 const { REACT_APP_COLLECTIBLE_CONTRACT } = process.env;
 
@@ -34,6 +34,7 @@ export interface HarmonyAccount {
   tokenBalance: number;
   isLoggedIn: boolean;
   collectibleTokens: CollectibleToken[];
+  account: string;
 }
 
 export const HarmonyAccountContext = createContext<HarmonyAccount>({
@@ -44,6 +45,7 @@ export const HarmonyAccountContext = createContext<HarmonyAccount>({
   isLoggedIn: false,
   collectibleTokens: [],
   harmonyOneAddress: "",
+  account: "",
 });
 // will add support for additional wallets later
 
@@ -95,7 +97,7 @@ const HarmonyAccountProvider: React.FC<PropsWithChildren<{
         const collectionBalance = await contract.methods
           .balanceOf(accounts[0])
           .call();
-        setTokenBalance(collectionBalance);
+        setTokenBalance(parseInt(collectionBalance, 10));
       }
     }
     getTokenBalance().then(() => Promise.resolve());
@@ -153,8 +155,9 @@ const HarmonyAccountProvider: React.FC<PropsWithChildren<{
         harmonyOneBalance,
         tokenBalance,
         collectibleTokens,
-        isLoggedIn: !!networkId,
+        isLoggedIn: !(accounts && accounts.length),
         harmonyOneAddress,
+        account: (accounts?.length && accounts[0]) || "",
       }}
     >
       {children}

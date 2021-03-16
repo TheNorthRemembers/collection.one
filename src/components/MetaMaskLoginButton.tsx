@@ -4,9 +4,13 @@ import { MetaMaskButton } from "rimble-ui";
 
 interface Props {
   web3Context: Web3Context | null;
+  size: string;
 }
 
-const MetaMaskLoginButton: React.FC<Props> = ({ web3Context }): JSX.Element => {
+const MetaMaskLoginButton: React.FC<Props> = ({
+  web3Context,
+  size,
+}): JSX.Element => {
   const requestAuth = async (web3Context: Web3Context | null) => {
     if (web3Context) {
       try {
@@ -20,7 +24,7 @@ const MetaMaskLoginButton: React.FC<Props> = ({ web3Context }): JSX.Element => {
   const requestAccess = useCallback(() => requestAuth(web3Context), []);
 
   return (
-    <MetaMaskButton size="large" onClick={requestAccess}>
+    <MetaMaskButton size={size} onClick={requestAccess}>
       Connect with MetaMask
     </MetaMaskButton>
   );

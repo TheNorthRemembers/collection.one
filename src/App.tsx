@@ -1,8 +1,8 @@
 import React from "react";
 import { Box, Heading } from "rimble-ui";
 import { useWeb3 } from "@openzeppelin/network/react";
-import HarmonyAccountProvider from "./contexts/HarmonyAccount";
-import Demo from "./components/Demo";
+import HarmonyAccountProvider from "./contexts/HarmonyAccountContext";
+import Dashboard from "./pages/Dashboard";
 import "./App.css";
 
 function App(): JSX.Element {
@@ -10,12 +10,9 @@ function App(): JSX.Element {
 
   return (
     <Box className="App">
-      <Heading as="h1" className="App-header">
-        NFT Proof of Concept for Harmony Blockchain - Built on Testnet
-      </Heading>
-      <Box className="App-content">
+      <Box className="App-content" my={3}>
         <HarmonyAccountProvider key="1" web3Context={web3Context}>
-          <Demo />
+          <Dashboard />
         </HarmonyAccountProvider>
       </Box>
     </Box>
