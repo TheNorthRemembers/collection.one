@@ -22,7 +22,7 @@ export type ContractActions =
 
 export const contractReducer = (
   state: ContractState,
-  action
+  action: ContractActions
 ): ContractState => {
   switch (action.type) {
     case "GetContract":
@@ -52,7 +52,7 @@ export const getContract = (
   contractAddress: string,
   abi: AbiItem | AbiItem[],
   web3: Web3
-) => {
+): void => {
   dispatch({ type: "GetContract" });
   const { eth } = web3;
   const contract = new eth.Contract(abi, contractAddress);

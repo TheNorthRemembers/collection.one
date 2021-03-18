@@ -64,6 +64,7 @@ export const getCollectibleTokensByAccount = (
           new Array(parseInt(balance, 10)),
           (v, i) => contract.methods.tokenOfOwnerByIndex(account, i).call()
         );
+
         if (tokens.length) {
           const tokensIdAndURI = await Bluebird.map(
             tokens,
@@ -74,12 +75,13 @@ export const getCollectibleTokensByAccount = (
             { concurrency: 2 }
           );
           // annotate with the metadata
-          const tokensAndMetadata = await Bluebird.map(
+          const tokensAndMetadata = await Bluebird.mapSeries(
             tokensIdAndURI,
             async (tokenIdAndURI) => {
               const metadata = await axios
                 .get(tokenIdAndURI.tokenURI)
-                .then(({ data }) => data);
+                .then(({ data }) => data)
+                .catch(() => {});
               return { ...tokenIdAndURI, metadata: { ...metadata } };
             }
           );

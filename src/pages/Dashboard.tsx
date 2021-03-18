@@ -1,7 +1,5 @@
-import React, { FC, useContext, useEffect, useMemo, useReducer } from "react";
-import { Flex, Tooltip, Icon, Text, Card, Box } from "rimble-ui";
-import NetworkIndicatorCard from "../components/cards/NetworkIndicatorCard";
-import BalanceCard from "../components/cards/BalanceCard";
+import React, { FC, useContext, useEffect, useReducer } from "react";
+import { Flex, Box, Heading, Loader } from "rimble-ui";
 import {
   initialContractState,
   contractReducer,
@@ -17,9 +15,7 @@ import { HarmonyAccountContext } from "../contexts";
 const { REACT_APP_COLLECTIBLE_CONTRACT } = process.env;
 
 const Dashboard: FC = (): JSX.Element => {
-  const { isLoggedIn, web3Context, harmonyOneBalance, account } = useContext(
-    HarmonyAccountContext
-  );
+  const { web3Context, account } = useContext(HarmonyAccountContext);
 
   const [{ contract }, contractDispatch] = useReducer(
     contractReducer,
@@ -54,23 +50,27 @@ const Dashboard: FC = (): JSX.Element => {
 
   return (
     <>
-      <Flex>
-        <Box p={3} width={1}>
-          <NetworkIndicatorCard
-            web3Context={web3Context}
-            isLoggedIn={isLoggedIn}
-          />
-        </Box>
-        <Box p={3} width={1}>
-          <BalanceCard harmonyOneBalance={harmonyOneBalance} />
-        </Box>
-      </Flex>
-
-      <Flex style={{ flexWrap: "wrap", margin: "auto", width: "50%" }}>
-        {collectibleTokens.length ? (
-          <CollectibleCards collectibleTokens={collectibleTokens} />
-        ) : null}
-      </Flex>
+      <Box>
+        <Flex style={{ justifyContent: "center" }}>
+          <Heading as="h1">My Collectible NFTs</Heading>
+        </Flex>
+        <Flex style={{ flexWrap: "wrap", margin: "auto", width: "75%" }}>
+          {collectibleTokens.length ? (
+            <CollectibleCards collectibleTokens={collectibleTokens} />
+          ) : (
+            <Box
+              key="collectible-loader"
+              p={3}
+              style={{
+                width: "100%",
+                margin: "auto",
+              }}
+            >
+              <Loader size="80px" />
+            </Box>
+          )}
+        </Flex>
+      </Box>
     </>
   );
 };

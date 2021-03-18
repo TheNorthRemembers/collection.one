@@ -10,22 +10,16 @@ import { getAddress } from "@harmony-js/crypto";
 
 export interface HarmonyAccount {
   web3Context: Web3Context | null;
-  // contract: Contract | null;
   harmonyOneBalance: string;
   harmonyOneAddress: string;
-  // tokenBalance: number;
   isLoggedIn: boolean;
-  //  collectibleTokens: CollectibleToken[];
   account: string;
 }
 
 export const HarmonyAccountContext = createContext<HarmonyAccount>({
   web3Context: null,
-  //  contract: null,
   harmonyOneBalance: "",
-  // tokenBalance: 0,
   isLoggedIn: false,
-  // collectibleTokens: [],
   harmonyOneAddress: "",
   account: "",
 });
@@ -59,10 +53,7 @@ const HarmonyAccountProvider: React.FC<PropsWithChildren<{
     <HarmonyAccountContext.Provider
       value={{
         web3Context,
-        //    contract,
         harmonyOneBalance,
-        //  tokenBalance,
-        //  collectibleTokens,
         isLoggedIn: !!accounts?.length,
         harmonyOneAddress,
         account: (accounts?.length && accounts[0]) || "",

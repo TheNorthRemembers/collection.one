@@ -5,9 +5,9 @@ interface Props {
   harmonyOneBalance: string;
 }
 
-const BalanceCard = ({ harmonyOneBalance }) => {
+const BalanceCard: React.FC<Props> = ({ harmonyOneBalance }) => {
   return (
-    <Card>
+    <Card style={{ minWidth: "270px" }}>
       <Flex flexDirection="column">
         <Text fontSize={1} color="silver" caps>
           Harmony One Balance

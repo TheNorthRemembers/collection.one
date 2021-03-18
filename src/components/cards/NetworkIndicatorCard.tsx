@@ -1,14 +1,12 @@
 import React, { useMemo, FC } from "react";
 import { Flex, Tooltip, Icon, Text, Card } from "rimble-ui";
 import { Web3Context } from "@openzeppelin/network";
-import MetaMaskLoginButton from "../MetaMaskLoginButton";
 
 interface Props {
   isLoggedIn: boolean;
-  web3Context: Web3Context | null;
 }
 
-const NetworkIndicatorCard: FC<Props> = ({ isLoggedIn, web3Context }) => {
+const NetworkIndicatorCard: FC<Props> = ({ isLoggedIn }) => {
   const { message, icon, color } = useMemo(() => {
     if (isLoggedIn) {
       return { message: "Logged In", icon: "CheckCircle", color: "success" };
@@ -17,7 +15,7 @@ const NetworkIndicatorCard: FC<Props> = ({ isLoggedIn, web3Context }) => {
   }, [isLoggedIn]);
 
   return (
-    <Card>
+    <Card style={{ minWidth: "270px" }}>
       <Flex flexDirection="column">
         <Text fontSize={1} color="silver" caps>
           Current Network
@@ -28,11 +26,6 @@ const NetworkIndicatorCard: FC<Props> = ({ isLoggedIn, web3Context }) => {
             <Icon name={icon} color={color} />
           </Flex>
         </Tooltip>
-        <Text>
-          {!isLoggedIn && (
-            <MetaMaskLoginButton web3Context={web3Context} size="small" />
-          )}
-        </Text>
       </Flex>
     </Card>
   );

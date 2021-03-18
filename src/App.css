@@ -24,6 +24,10 @@
   /*color: white;*/
 }
 
+.ant-tabs-nav-wrap {
+  justify-content: center;
+}
+
 .App-content {
   min-height: 20vh;
   display: flex;

@@ -4,9 +4,10 @@ module.exports = {
     "airbnb",
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
+    "plugin:react/recommended",
+    "plugin:import/typescript",
   ],
   parser: "@typescript-eslint/parser",
-  plugins: ["@typescript-eslint", "prettier"],
   settings: {
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"],
@@ -56,8 +57,6 @@ module.exports = {
     "no-shadow": "off",
     "no-case-declarations": "off",
     "import/no-unresolved": "off",
-    "import/extensions": "off",
-    "@typescript-eslint/indent": "off",
     "comma-dangle": "off",
     "arrow-parens": "off",
     "operator-linebreak": "off",
@@ -85,5 +84,6 @@ module.exports = {
     "react-hooks/exhaustive-deps": "off",
     indent: "off",
     curly: "error",
+    "@typescript-eslint/no-unused-vars": 0,
   },
 };
