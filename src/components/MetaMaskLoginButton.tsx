@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import Web3Context from "@openzeppelin/network/lib/context/Web3Context";
 import { MetaMaskButton } from "rimble-ui";
+import { Wallet } from "../contexts";
 
 interface Props {
   web3Context: Web3Context | null;
@@ -21,7 +22,9 @@ const MetaMaskLoginButton: React.FC<Props> = ({
     }
   };
 
-  const requestAccess = useCallback(() => requestAuth(web3Context), []);
+  const requestAccess = useCallback(() => requestAuth(web3Context), [
+    web3Context,
+  ]);
 
   return (
     <MetaMaskButton size={size} onClick={requestAccess}>

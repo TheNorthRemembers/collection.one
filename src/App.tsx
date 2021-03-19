@@ -31,14 +31,22 @@ function App(): JSX.Element {
           >
             <TabPane tab="My NFT Dashboard" key="1">
               <Suspense
-                fallback={<Loader style={{ margin: "auto" }} size="80px" />}
+                fallback={
+                  <Box my={4}>
+                    <Loader style={{ margin: "auto" }} size="80px" />
+                  </Box>
+                }
               >
                 <Dashboard />
               </Suspense>
             </TabPane>
             <TabPane tab="Mint an NFT" key="2">
               <Suspense
-                fallback={<Loader style={{ margin: "auto" }} size="80px" />}
+                fallback={
+                  <Box my={4}>
+                    <Loader style={{ margin: "auto" }} size="80px" />
+                  </Box>
+                }
               >
                 <Minter />
               </Suspense>

@@ -45,7 +45,6 @@ module.exports = {
       2,
       { devDependencies: ["**/*.test.tsx", "**/*.test.ts"] },
     ],
-    "@typescript-eslint/indent": [2, 2],
     "@typescript-eslint/explicit-function-return-type": "off",
     "react/jsx-props-no-spreading": "off",
     "no-plusplus": "off",

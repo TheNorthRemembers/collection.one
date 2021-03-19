@@ -31,7 +31,9 @@ import ArtCollectibleToken from "../contracts/ArtCollectibleToken.json";
 const { REACT_APP_COLLECTIBLE_CONTRACT } = process.env;
 
 const Minter: FC = (): JSX.Element => {
-  const { account, web3Context } = useContext(HarmonyAccountContext);
+  const { metaMaskAccount, web3Context, isLoggedIn } = useContext(
+    HarmonyAccountContext
+  );
 
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -68,7 +70,7 @@ const Minter: FC = (): JSX.Element => {
         REACT_APP_COLLECTIBLE_CONTRACT,
         // @ts-ignore
         ArtCollectibleToken.abi, // ignored because of Solidity verions
-        web3Context.lib
+        web3Context.lib.eth
       );
     }
   }, [web3Context, REACT_APP_COLLECTIBLE_CONTRACT]);
@@ -124,8 +126,12 @@ const Minter: FC = (): JSX.Element => {
       if (artist && image && tokenUri && contract) {
         setStepMessage("Creating transaction and minting your NFT!");
         await contract.methods
-          .mint(account, image, artist, tokenUri)
-          .send({ from: account });
+          .mint(metaMaskAccount, image, artist, tokenUri)
+          .send({
+            from: metaMaskAccount,
+            gasLimit: 3321900,
+            gasPrice: 1000000000,
+          });
         setStepMessage(null);
       }
     }
@@ -133,55 +139,85 @@ const Minter: FC = (): JSX.Element => {
     mint();
   }, [artist, image, tokenUri, contract]);
 
+  const buttonDisabled = useMemo(() => {
+    return !(
+      artist &&
+      contract &&
+      selectedFile &&
+      name &&
+      description &&
+      isLoggedIn
+    );
+  }, [artist, contract, selectedFile, name, description, isLoggedIn]);
+
+  const headerMessage = useMemo(() => {
+    if (isLoggedIn) {
+      return "Mint an NFT";
+    }
+    return "Please Log In to Mint an NFT";
+  }, [isLoggedIn]);
+
   return (
     <>
       <Box>
         <Flex style={{ justifyContent: "center" }}>
-          <Heading as="h1">Mint an NFT</Heading>
+          <Heading as="h1">{headerMessage}</Heading>
         </Flex>
-        {step || (
+        {isLoggedIn && (
           <>
-            <Flex style={{ flexWrap: "wrap", margin: "auto" }}>
-              <Box>
-                <Field label="Nft Name" mx={3}>
-                  <Input
-                    type="text"
-                    required
-                    placeholder="NFT Name"
-                    onChange={(e) => handleInput(e, setName)}
-                    value={name}
-                  />
+            {step || (
+              <>
+                <Flex style={{ flexWrap: "wrap", margin: "auto" }}>
+                  <Box>
+                    <Field label="Nft Name" mx={3}>
+                      <Input
+                        type="text"
+                        required
+                        placeholder="NFT Name"
+                        onChange={(e) => handleInput(e, setName)}
+                        value={name}
+                      />
+                    </Field>
+                    <Field label="Artist" mx={3}>
+                      <Input
+                        type="text"
+                        required
+                        placeholder="artist"
+                        onChange={(e) => handleInput(e, setArtist)}
+                        value={artist}
+                      />
+                    </Field>
+                  </Box>
+                </Flex>
+                <Box>
+                  <Field
+                    label="NFT Description"
+                    mx={3}
+                    style={{ display: "flex" }}
+                  >
+                    <Textarea
+                      rows={4}
+                      required
+                      placeholder="description"
+                      onChange={(e) => handleInput(e, setDescription)}
+                      value={description}
+                    />
+                  </Field>
+                </Box>
+                <Field label="Upload an NFT Image">
+                  <Input type="file" required onChange={handleFileInput} />
                 </Field>
-                <Field label="Artist" mx={3}>
-                  <Input
-                    type="text"
-                    required
-                    placeholder="artist"
-                    onChange={(e) => handleInput(e, setArtist)}
-                    value={artist}
-                  />
-                </Field>
-              </Box>
-            </Flex>
-            <Box>
-              <Field label="NFT Description" mx={3} style={{ display: "flex" }}>
-                <Textarea
-                  rows={4}
-                  required
-                  placeholder="description"
-                  onChange={(e) => handleInput(e, setDescription)}
-                  value={description}
-                />
-              </Field>
-            </Box>
-            <Field label="Upload an NFT Image">
-              <Input type="file" required onChange={handleFileInput} />
-            </Field>
-            <Box>
-              <Button type="button" onClick={submitForm}>
-                Create NFT
-              </Button>
-            </Box>
+                <Box>
+                  <Button
+                    type="button"
+                    onClick={submitForm}
+                    disabled={buttonDisabled}
+                  >
+                    Create NFT
+                  </Button>
+                </Box>
+              </>
+            )}
           </>
         )}
       </Box>

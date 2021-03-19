@@ -1,10 +1,12 @@
 import { Dispatch } from "react";
 import { Contract } from "web3-eth-contract";
-import Web3 from "web3";
+import { Eth } from "web3-eth";
 import { AbiItem } from "web3-utils";
+import { HarmonyExtension } from "@harmony-js/core";
+import { Contract as HarmonyContract } from "@harmony-js/contract";
 
 interface ContractState {
-  contract: Contract | null;
+  contract: Contract | HarmonyContract | null;
   loading: boolean;
   error: string | null;
 }
@@ -17,7 +19,7 @@ export const initialContractState: ContractState = {
 
 export type ContractActions =
   | { type: "GetContract" }
-  | { type: "GetContractSuccess"; payload: Contract }
+  | { type: "GetContractSuccess"; payload: Contract | HarmonyContract }
   | { type: "GetContractFailure"; payload: string };
 
 export const contractReducer = (
@@ -51,11 +53,26 @@ export const getContract = (
   dispatch: Dispatch<ContractActions>,
   contractAddress: string,
   abi: AbiItem | AbiItem[],
-  web3: Web3
+  eth: Eth
 ): void => {
   dispatch({ type: "GetContract" });
-  const { eth } = web3;
+
   const contract = new eth.Contract(abi, contractAddress);
+  if (contract) {
+    dispatch({ type: "GetContractSuccess", payload: contract });
+  }
+  dispatch({ type: "GetContractFailure", payload: "Could not get contract!" });
+};
+
+export const getOneWalletContract = (
+  dispatch: Dispatch<ContractActions>,
+  contractAddress: string,
+  abi: AbiItem[],
+  harmonyExt: HarmonyExtension
+): void => {
+  dispatch({ type: "GetContract" });
+
+  const contract = harmonyExt.contracts.createContract(abi, contractAddress);
   if (contract) {
     dispatch({ type: "GetContractSuccess", payload: contract });
   }

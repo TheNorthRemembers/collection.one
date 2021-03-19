@@ -2,6 +2,7 @@ import { Dispatch } from "react";
 import { Contract } from "web3-eth-contract";
 import Bluebird from "bluebird";
 import axios from "axios";
+import { Contract as HarmonyContract } from "@harmony-js/contract";
 
 import { CollectibleToken } from "../interfaces";
 
@@ -51,7 +52,7 @@ export const collectibleTokensReducer = (
 
 export const getCollectibleTokensByAccount = (
   dispatch: Dispatch<TokenActions>,
-  contract: Contract,
+  contract: Contract | HarmonyContract,
   account: string
 ) => {
   dispatch({ type: "GetTokens" });
