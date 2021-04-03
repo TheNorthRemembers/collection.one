@@ -14,8 +14,10 @@ export type Wallet = "Metamask" | "OneWallet" | null;
 
 export interface HarmonyAccount {
   web3Context: Web3Context | null;
-  metaMaskBalance: string;
+  balance: string;
   metaMaskHarmonyOneAddress: string;
+  isLoggedInToMetamask: boolean;
+  isLoggedIntoOneWallet: boolean;
   isLoggedIn: boolean;
   metaMaskAccount: string;
   harmonyExt: HarmonyExtension | null;
@@ -24,18 +26,22 @@ export interface HarmonyAccount {
   setHarmonyAccount: React.Dispatch<
     React.SetStateAction<ExtensionAccount | null>
   > | null;
+  onewallet: any;
 }
 
 export const HarmonyAccountContext = createContext<HarmonyAccount>({
   web3Context: null,
-  metaMaskBalance: "",
-  isLoggedIn: false,
+  balance: "",
+  isLoggedInToMetamask: false,
   metaMaskHarmonyOneAddress: "",
   metaMaskAccount: "",
   harmonyExt: null,
   oneWalletBalance: "",
   oneWalletAddress: "",
   setHarmonyAccount: null,
+  isLoggedIntoOneWallet: false,
+  isLoggedIn: false,
+  onewallet: null,
 });
 
 declare global {
@@ -59,8 +65,8 @@ const HarmonyAccountProvider: React.FC<PropsWithChildren<{
     null
   );
   const [oneWalletBalance, setOneWalletBalance] = useState<string>("");
-  const [wallet, setWallet] = useState<Wallet>(null);
 
+  // Metamask
   const harmonyOneAddress = useMemo(
     () => (accounts && accounts.length ? getAddress(accounts[0]).bech32 : ""),
     [accounts]
@@ -70,23 +76,25 @@ const HarmonyAccountProvider: React.FC<PropsWithChildren<{
   // create harmony extension instance
   useEffect(() => {
     async function createHarmonyOneExtension() {
-      if (window && window.onewallet && HarmonyExtension) {
-        setHarmonyExt(await new HarmonyExtension(window.onewallet));
+      if (window && window.onewallet && HarmonyExtension && !harmonyExt) {
+        const ext = await new HarmonyExtension(window.onewallet);
+        ext.setProvider("https://api.s0.b.hmny.io/");
+        setHarmonyExt(ext);
       }
     }
     createHarmonyOneExtension().then(() => Promise.resolve());
-  }, [window, setHarmonyExt, HarmonyExtension]);
+  }, [window, setHarmonyExt, HarmonyExtension, harmonyExt]);
 
   useEffect(() => {
     if (harmonyAccount && harmonyExt) {
       const { address } = harmonyAccount;
       harmonyExt?.blockchain
         .getBalance({ address, blockNumber: "latest" })
-        .then(({ result }) => setOneWalletBalance(Unit.Wei(result).toEther()));
+        .then(({ result }) => setHarmonyOneBalance(Unit.Wei(result).toEther()));
     }
   }, [harmonyAccount, harmonyExt]);
 
-  // gets total balance of One tokens as account address
+  // gets total balance of One tokens as account addresss - using Metamask
   useEffect(() => {
     async function getOneBalance() {
       const balance =
@@ -103,7 +111,7 @@ const HarmonyAccountProvider: React.FC<PropsWithChildren<{
       value={{
         // metamask logins
         web3Context,
-        metaMaskBalance: harmonyOneBalance,
+        balance: harmonyOneBalance,
         metaMaskHarmonyOneAddress: harmonyOneAddress,
         metaMaskAccount: (accounts?.length && accounts[0]) || "",
         // harmony wallet only
@@ -112,7 +120,11 @@ const HarmonyAccountProvider: React.FC<PropsWithChildren<{
         oneWalletAddress: (harmonyAccount && harmonyAccount.address) || "",
         setHarmonyAccount,
         // univeral logged in
-        isLoggedIn: !!accounts?.length || !!harmonyAccount?.address,
+        isLoggedInToMetamask: !!accounts?.length,
+        isLoggedIntoOneWallet: !!(harmonyAccount && harmonyAccount.address),
+        isLoggedIn:
+          !!accounts?.length || !!(harmonyAccount && harmonyAccount.address),
+        onewallet: window && window.onewallet,
       }}
     >
       {children}

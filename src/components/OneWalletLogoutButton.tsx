@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from "react";
-import { MetaMaskButton } from "rimble-ui";
+import { Button } from "rimble-ui";
 import { ExtensionAccount, HarmonyExtension } from "@harmony-js/core";
-import { Wallet } from "../contexts";
 
 interface Props {
   harmonyExt: HarmonyExtension | null;
@@ -29,9 +28,9 @@ const OneWalletLogoutButton: React.FC<Props> = ({
   ]);
 
   return (
-    <MetaMaskButton size={size} onClick={requestAccess}>
-      Logout of One Wallet
-    </MetaMaskButton>
+    <Button size={size} onClick={requestAccess}>
+      Logout of Onewallet
+    </Button>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { Flex, Card, Box, EthAddress, Text } from "rimble-ui";
 import MetaMaskLoginButton from "./MetaMaskLoginButton";
 import OneWalletLoginButton from "./OneWalletLoginButton";
@@ -9,15 +9,25 @@ import { HarmonyAccountContext } from "../contexts";
 
 const Header = () => {
   const {
-    isLoggedIn,
+    isLoggedInToMetamask,
+    isLoggedIntoOneWallet,
     web3Context,
-    metaMaskBalance,
+    balance,
+    oneWalletBalance,
     setHarmonyAccount,
     harmonyExt,
   } = useContext(HarmonyAccountContext);
+
+  const accountBalance = useMemo(() => {
+    if (isLoggedInToMetamask || isLoggedIntoOneWallet) {
+      return balance;
+    }
+    return "0";
+  }, [isLoggedIntoOneWallet, isLoggedInToMetamask, balance]);
+
   return (
     <>
-      {!isLoggedIn ? (
+      {!isLoggedInToMetamask && !isLoggedIntoOneWallet && (
         <Flex>
           <Box p={3}>
             <Card>
@@ -34,7 +44,8 @@ const Header = () => {
             </Card>
           </Box>
         </Flex>
-      ) : (
+      )}
+      {isLoggedIntoOneWallet && (
         <Flex>
           <Box p={3}>
             <Card>
@@ -59,10 +70,12 @@ const Header = () => {
       </Box>
       <Flex>
         <Box p={3} width={1}>
-          <NetworkIndicatorCard isLoggedIn={isLoggedIn} />
+          <NetworkIndicatorCard
+            isLoggedIn={isLoggedInToMetamask || isLoggedIntoOneWallet}
+          />
         </Box>
         <Box p={3} width={1}>
-          <BalanceCard harmonyOneBalance={metaMaskBalance} />
+          <BalanceCard harmonyOneBalance={accountBalance} />
         </Box>
       </Flex>
     </>

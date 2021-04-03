@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from "react";
-import { MetaMaskButton } from "rimble-ui";
+import { Button } from "rimble-ui";
 import { ExtensionAccount, HarmonyExtension } from "@harmony-js/core";
-import { Wallet } from "../contexts";
 
 interface Props {
   harmonyExt: HarmonyExtension | null;
@@ -21,7 +20,6 @@ const OneWalletLoginButton: React.FC<Props> = ({
       await harmonyExt
         .login()
         .then((acc) => {
-          // Todo with the account
           setHarmonyAccount(acc);
         })
         .catch((err) => {
@@ -36,9 +34,9 @@ const OneWalletLoginButton: React.FC<Props> = ({
   ]);
 
   return (
-    <MetaMaskButton size={size} onClick={requestAccess}>
-      Connect with One Wallet
-    </MetaMaskButton>
+    <Button size={size} onClick={requestAccess}>
+      Connect with Onewallet
+    </Button>
   );
 };
 

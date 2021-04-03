@@ -24,6 +24,7 @@ import { HarmonyAccountContext } from "../contexts/HarmonyAccountContext";
 import {
   contractReducer,
   getContract,
+  getOneWalletContract,
   initialContractState,
 } from "../reducers";
 import ArtCollectibleToken from "../contracts/ArtCollectibleToken.json";
@@ -31,9 +32,15 @@ import ArtCollectibleToken from "../contracts/ArtCollectibleToken.json";
 const { REACT_APP_COLLECTIBLE_CONTRACT } = process.env;
 
 const Minter: FC = (): JSX.Element => {
-  const { metaMaskAccount, web3Context, isLoggedIn } = useContext(
-    HarmonyAccountContext
-  );
+  const {
+    metaMaskAccount,
+    web3Context,
+    isLoggedInToMetamask,
+    harmonyExt,
+    oneWalletAddress,
+    isLoggedIntoOneWallet,
+    onewallet,
+  } = useContext(HarmonyAccountContext);
 
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -64,7 +71,7 @@ const Minter: FC = (): JSX.Element => {
   );
 
   useEffect(() => {
-    if (web3Context && REACT_APP_COLLECTIBLE_CONTRACT) {
+    if (web3Context && REACT_APP_COLLECTIBLE_CONTRACT && isLoggedInToMetamask) {
       getContract(
         contractDispatch,
         REACT_APP_COLLECTIBLE_CONTRACT,
@@ -72,8 +79,30 @@ const Minter: FC = (): JSX.Element => {
         ArtCollectibleToken.abi, // ignored because of Solidity verions
         web3Context.lib.eth
       );
+    } else if (
+      harmonyExt &&
+      REACT_APP_COLLECTIBLE_CONTRACT &&
+      isLoggedIntoOneWallet &&
+      onewallet
+    ) {
+      const { abi } = ArtCollectibleToken;
+      getOneWalletContract(
+        contractDispatch,
+        REACT_APP_COLLECTIBLE_CONTRACT,
+        // @ts-ignore
+        abi, // ignored because of Solidity versions
+        harmonyExt,
+        onewallet
+      );
     }
-  }, [web3Context, REACT_APP_COLLECTIBLE_CONTRACT]);
+  }, [
+    web3Context,
+    REACT_APP_COLLECTIBLE_CONTRACT,
+    harmonyExt,
+    isLoggedInToMetamask,
+    isLoggedIntoOneWallet,
+    onewallet,
+  ]);
 
   const nftMetadata: TokenMetadata | null = useMemo(() => {
     if (name && description && image) {
@@ -125,13 +154,16 @@ const Minter: FC = (): JSX.Element => {
     async function mint() {
       if (artist && image && tokenUri && contract) {
         setStepMessage("Creating transaction and minting your NFT!");
-        await contract.methods
-          .mint(metaMaskAccount, image, artist, tokenUri)
-          .send({
-            from: metaMaskAccount,
-            gasLimit: 3321900,
-            gasPrice: 1000000000,
-          });
+        // TODO
+        // normalize this
+        const address = isLoggedInToMetamask
+          ? metaMaskAccount
+          : harmonyExt?.crypto.getAddress(oneWalletAddress).basicHex;
+        await contract.methods.mint(address, image, artist, tokenUri).send({
+          from: address,
+          gasLimit: 3321900,
+          gasPrice: 1000000000,
+        });
         setStepMessage(null);
       }
     }
@@ -146,16 +178,16 @@ const Minter: FC = (): JSX.Element => {
       selectedFile &&
       name &&
       description &&
-      isLoggedIn
+      (isLoggedInToMetamask || isLoggedIntoOneWallet)
     );
-  }, [artist, contract, selectedFile, name, description, isLoggedIn]);
+  }, [artist, contract, selectedFile, name, description, isLoggedInToMetamask]);
 
   const headerMessage = useMemo(() => {
-    if (isLoggedIn) {
+    if (isLoggedInToMetamask || isLoggedIntoOneWallet) {
       return "Mint an NFT";
     }
     return "Please Log In to Mint an NFT";
-  }, [isLoggedIn]);
+  }, [isLoggedInToMetamask, isLoggedIntoOneWallet]);
 
   return (
     <>
@@ -163,7 +195,7 @@ const Minter: FC = (): JSX.Element => {
         <Flex style={{ justifyContent: "center" }}>
           <Heading as="h1">{headerMessage}</Heading>
         </Flex>
-        {isLoggedIn && (
+        {(isLoggedInToMetamask || isLoggedIntoOneWallet) && (
           <>
             {step || (
               <>

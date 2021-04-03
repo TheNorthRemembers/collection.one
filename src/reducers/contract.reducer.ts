@@ -2,8 +2,10 @@ import { Dispatch } from "react";
 import { Contract } from "web3-eth-contract";
 import { Eth } from "web3-eth";
 import { AbiItem } from "web3-utils";
-import { HarmonyExtension } from "@harmony-js/core";
+import { Harmony, HarmonyExtension } from "@harmony-js/core";
 import { Contract as HarmonyContract } from "@harmony-js/contract";
+
+import { ChainID, ChainType } from "@harmony-js/utils";
 
 interface ContractState {
   contract: Contract | HarmonyContract | null;
@@ -49,6 +51,8 @@ export const contractReducer = (
   }
 };
 
+// TODO - these two functions are almost identical
+
 export const getContract = (
   dispatch: Dispatch<ContractActions>,
   contractAddress: string,
@@ -68,11 +72,13 @@ export const getOneWalletContract = (
   dispatch: Dispatch<ContractActions>,
   contractAddress: string,
   abi: AbiItem[],
-  harmonyExt: HarmonyExtension
+  harmonyExt: HarmonyExtension,
+  onewallet: any
 ): void => {
   dispatch({ type: "GetContract" });
 
   const contract = harmonyExt.contracts.createContract(abi, contractAddress);
+
   if (contract) {
     dispatch({ type: "GetContractSuccess", payload: contract });
   }
