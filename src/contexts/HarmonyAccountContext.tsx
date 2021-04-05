@@ -11,7 +11,7 @@ import { getAddress } from "@harmony-js/crypto";
 import { Unit } from "@harmony-js/utils";
 
 export type Wallet = "Metamask" | "OneWallet" | null;
-
+//  TODO refactor this, make it uniform
 export interface HarmonyAccount {
   web3Context: Web3Context | null;
   balance: string;
@@ -76,14 +76,26 @@ const HarmonyAccountProvider: React.FC<PropsWithChildren<{
   // create harmony extension instance
   useEffect(() => {
     async function createHarmonyOneExtension() {
-      if (window && window.onewallet && HarmonyExtension && !harmonyExt) {
-        const ext = await new HarmonyExtension(window.onewallet);
-        ext.setProvider("https://api.s0.b.hmny.io/");
-        setHarmonyExt(ext);
+      if (
+        window &&
+        window.onewallet &&
+        Object.keys(window.onewallet).length &&
+        HarmonyExtension
+      ) {
+        try {
+          console.log(window.onewallet);
+          const ext = await new HarmonyExtension(window.onewallet);
+          ext.setProvider("https://api.s0.b.hmny.io/");
+          setHarmonyExt(ext);
+        } catch (err) {
+          console.log(err);
+          // do nothing
+          // sometimes the extension is not ready, it will repeat
+        }
       }
     }
     createHarmonyOneExtension().then(() => Promise.resolve());
-  }, [window, setHarmonyExt, HarmonyExtension, harmonyExt]);
+  }, [window, setHarmonyExt, HarmonyExtension]);
 
   useEffect(() => {
     if (harmonyAccount && harmonyExt) {
