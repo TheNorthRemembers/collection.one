@@ -10,7 +10,7 @@ import {
   getCollectibleTokensByAccount,
   getCollectibleTokensByAccountForOneWallet,
 } from "../reducers";
-import ArtCollectibleToken from "../contracts/ArtCollectibleToken.json";
+import ArtCollectibleToken from "../contracts/CollectibleDotOne.json";
 import CollectibleCards from "../components/CollectibleCards";
 import { HarmonyAccountContext } from "../contexts";
 

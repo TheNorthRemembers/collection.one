@@ -27,7 +27,7 @@ import {
   getOneWalletContract,
   initialContractState,
 } from "../reducers";
-import ArtCollectibleToken from "../contracts/ArtCollectibleToken.json";
+import ArtCollectibleToken from "../contracts/CollectibleDotOne.json";
 
 const { REACT_APP_COLLECTIBLE_CONTRACT } = process.env;
 
@@ -159,7 +159,7 @@ const Minter: FC = (): JSX.Element => {
         const address = isLoggedInToMetamask
           ? metaMaskAccount
           : harmonyExt?.crypto.getAddress(oneWalletAddress).basicHex;
-        await contract.methods.mint(address, image, artist, tokenUri).send({
+        await contract.methods.mint(image, artist, tokenUri).send({
           from: address,
           gasLimit: 3321900,
           gasPrice: 1000000000,
